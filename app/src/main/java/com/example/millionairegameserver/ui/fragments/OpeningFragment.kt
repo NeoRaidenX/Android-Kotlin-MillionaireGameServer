@@ -1,32 +1,25 @@
-package com.example.millionairegameserver
+package com.example.millionairegameserver.ui.fragments
 
-import android.media.MediaFormat
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.media3.common.Format
+import androidx.fragment.app.Fragment
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.ExoPlayer.AudioOffloadListener
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.exoplayer.video.VideoFrameMetadataListener
 import androidx.media3.ui.PlayerView
 import androidx.navigation.fragment.findNavController
+import com.example.millionairegameserver.R
 import com.example.millionairegameserver.databinding.FragmentOpeningBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-@UnstableApi /**
+@UnstableApi
+/**
  * A simple [Fragment] subclass.
  * Use the [OpeningFragment.newInstance] factory method to
  * create an instance of this fragment.
@@ -61,7 +54,7 @@ class OpeningFragment : Fragment() {
         exoPlayer.prepare()
         exoPlayer.play()
 
-        exoPlayer.addListener(object : Player.Listener{
+        exoPlayer.addListener(object : Player.Listener {
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
@@ -87,6 +80,7 @@ class OpeningFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         exoPlayer?.stop()
+        exoPlayer.release()
     }
 
     companion object {
@@ -101,13 +95,13 @@ class OpeningFragment : Fragment() {
          * @return A new instance of fragment OpeningFragment.
          */
         // TODO: Rename and change types and number of parameters
-        @JvmStatic
+        /*@JvmStatic
         fun newInstance(param1: String, param2: String) =
             OpeningFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
                 }
-            }
+            }*/
     }
 }

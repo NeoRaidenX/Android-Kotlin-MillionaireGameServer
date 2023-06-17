@@ -1,20 +1,24 @@
-package com.example.millionairegameserver
+package com.example.millionairegameserver.ui.fragments
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.millionairegameserver.ui.viewmodel.MainViewModel
 import com.example.millionairegameserver.databinding.FragmentMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainFragment : Fragment() {
 
     private lateinit var binding: FragmentMainBinding
 
     companion object {
         fun newInstance() = MainFragment()
+        private const val TAG = "MainFragment"
     }
 
     private lateinit var viewModel: MainViewModel
@@ -23,6 +27,7 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         binding = FragmentMainBinding.inflate(inflater, container, false)
         binding.button.setOnClickListener {
             navigateToOpening()
@@ -31,14 +36,14 @@ class MainFragment : Fragment() {
     }
 
     private fun navigateToOpening() {
-        val action = MainFragmentDirections.actionMainFragmentToOpeningFragment2()
+        val action = MainFragmentDirections.actionMainFragmentToQuestionFragment()
         findNavController().navigate(action)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        // TODO: Use the ViewModel
+        viewModel.loadQuestionsToDatabase()
     }
 
 }

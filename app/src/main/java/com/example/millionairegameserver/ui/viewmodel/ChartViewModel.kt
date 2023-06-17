@@ -1,4 +1,4 @@
-package com.example.millionairegameserver
+package com.example.millionairegameserver.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 

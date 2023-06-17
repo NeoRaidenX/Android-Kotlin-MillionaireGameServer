@@ -7,16 +7,19 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.millionairegameserver.MainFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.MainFragment"
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" >
         <action
             android:id="@+id/action_mainFragment_to_openingFragment2"
             app:destination="@id/openingFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_questionFragment"
+            app:destination="@id/questionFragment" />
     </fragment>
     <fragment
         android:id="@+id/openingFragment"
-        android:name="com.example.millionairegameserver.OpeningFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.OpeningFragment"
         android:label="fragment_opening"
         tools:layout="@layout/fragment_opening" >
         <action
@@ -25,12 +28,12 @@
     </fragment>
     <fragment
         android:id="@+id/tableFragment"
-        android:name="com.example.millionairegameserver.TableFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.TableFragment"
         android:label="fragment_table"
         tools:layout="@layout/fragment_table" />
     <fragment
         android:id="@+id/questionFragment"
-        android:name="com.example.millionairegameserver.QuestionFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.QuestionFragment"
         android:label="fragment_question"
         tools:layout="@layout/fragment_question" >
         <action
@@ -48,17 +51,17 @@
     </fragment>
     <fragment
         android:id="@+id/clockFragment"
-        android:name="com.example.millionairegameserver.ClockFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.ClockFragment"
         android:label="fragment_clock"
         tools:layout="@layout/fragment_clock" />
     <fragment
         android:id="@+id/chartFragment"
-        android:name="com.example.millionairegameserver.ChartFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.ChartFragment"
         android:label="fragment_chart"
         tools:layout="@layout/fragment_chart" />
     <fragment
         android:id="@+id/rewardFragment"
-        android:name="com.example.millionairegameserver.RewardFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.RewardFragment"
         android:label="fragment_reward"
         tools:layout="@layout/fragment_reward" />
 </navigation>
