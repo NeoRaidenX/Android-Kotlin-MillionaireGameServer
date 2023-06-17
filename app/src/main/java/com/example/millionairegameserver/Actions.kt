@@ -7,4 +7,5 @@ object Actions {
     const val NAVIGATE_REWARD = prefix + "nav_reward"
     const val NAVIGATE_CHART = prefix + "nav_chart"
     const val NAVIGATE_CLOCK = prefix + "nav_clock"
+    const val PLAY_CLOCK = prefix + "play_clock"
 }

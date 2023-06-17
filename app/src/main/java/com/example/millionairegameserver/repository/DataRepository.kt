@@ -121,7 +121,8 @@ class DataRepository(private val context: Context): Repository {
             navigateUp()
             delay(2000)*/
             //navigateTable()
-            navigateChart()
+            //navigateChart()
+            //navigateClock()
         }
     }
 
@@ -153,6 +154,8 @@ class DataRepository(private val context: Context): Repository {
     }
 
     override fun navigateClock() {
+        Log.d(TAG, "navigateClock: ")
+        broadcastUpdate(Actions.NAVIGATE_CLOCK)
     }
 
     override fun navigateUp() {
@@ -171,6 +174,8 @@ class DataRepository(private val context: Context): Repository {
     }
 
     override fun startClock() {
+        Log.d(TAG, "startClock: ")
+        broadcastUpdate(Actions.PLAY_CLOCK)
     }
 
     override fun getCurrentReward() {

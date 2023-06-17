@@ -3,11 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     tools:context=".ui.fragments.ClockFragment">
 
-    <TextView
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Hello" />
+        app:show_buffering="never"
+        app:use_controller="false" />
+
 
 </FrameLayout>

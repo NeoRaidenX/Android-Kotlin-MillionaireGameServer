@@ -106,7 +106,7 @@ import kotlinx.coroutines.launch
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: ")
-        App.applicationContext().registerReceiver(actionReceiver, getLoginIntentFilter())
+        registerReceiver()
     }
 
     private fun getLoginIntentFilter(): IntentFilter {
@@ -136,7 +136,7 @@ import kotlinx.coroutines.launch
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop: ")
-        App.applicationContext().unregisterReceiver(actionReceiver)
+        unregisterReceiver()
         exoPlayer?.stop()
         exoPlayer.release()
     }
