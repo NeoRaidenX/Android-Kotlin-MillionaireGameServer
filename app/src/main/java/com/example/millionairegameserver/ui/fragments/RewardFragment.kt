@@ -145,4 +145,14 @@ import kotlinx.coroutines.launch
         super.onDestroy()
         Log.d(TAG, "onDestroy: ")
     }
+
+    private fun registerReceiver() {
+        Log.d(TAG, "registerReceiver: ")
+        App.applicationContext().registerReceiver(actionReceiver, getLoginIntentFilter())
+    }
+
+    private fun unregisterReceiver() {
+        Log.d(TAG, "unregisterReceiver: ")
+        App.applicationContext().unregisterReceiver(actionReceiver)
+    }
 }

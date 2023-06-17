@@ -1,6 +1,7 @@
 package com.example.millionairegameserver.repository
 
 import com.example.millionairegameserver.LifelinesEnum
+import com.example.millionairegameserver.datamodel.ChartModel
 
 interface Repository {
 
@@ -22,7 +23,8 @@ interface Repository {
 
     fun showFifty()
     //Lifelines
-    fun getChartQuantity()
+    fun loadChartResult(chartModel: ChartModel)
+    fun showChartResult()
     fun navigateChart()
 
     fun navigateClock()

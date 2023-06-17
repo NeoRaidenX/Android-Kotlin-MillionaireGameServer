@@ -65,9 +65,16 @@ class QuestionFragment : Fragment() {
                     val action = QuestionFragmentDirections.actionQuestionFragmentToRewardFragment()
                     findNavController().navigate(action)
                 }
+                Actions.NAVIGATE_CHART -> {
+                    val action = QuestionFragmentDirections.actionQuestionFragmentToChartFragment()
+                    findNavController().navigate(action)
+                }
+                Actions.NAVIGATE_CLOCK -> {
+                    val action = QuestionFragmentDirections.actionQuestionFragmentToClockFragment()
+                    findNavController().navigate(action)
+                }
             }
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -135,7 +142,6 @@ class QuestionFragment : Fragment() {
         return binding.root
 
     }
-
 
 
     private fun correctAnswer(position: AnswersEnum) {
@@ -206,7 +212,8 @@ class QuestionFragment : Fragment() {
         val intentFilter = IntentFilter()
         intentFilter.addAction(Actions.NAVIGATE_REWARD)
         intentFilter.addAction(Actions.NAVIGATE_TABLE)
-        intentFilter.addAction(Actions.NAVIGATE_UP)
+        intentFilter.addAction(Actions.NAVIGATE_CHART)
+        intentFilter.addAction(Actions.NAVIGATE_CLOCK)
         return intentFilter
     }
 

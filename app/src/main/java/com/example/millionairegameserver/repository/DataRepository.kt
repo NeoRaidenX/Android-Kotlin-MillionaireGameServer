@@ -9,7 +9,9 @@ import com.example.millionairegameserver.App
 import com.example.millionairegameserver.LifelinesEnum
 import com.example.millionairegameserver.RewardTableEnum
 import com.example.millionairegameserver.database.AppDatabase
+import com.example.millionairegameserver.datamodel.ChartModel
 import com.example.millionairegameserver.datamodel.QuestionModel
+import com.example.millionairegameserver.ui.viewmodel.ChartUiState
 import com.example.millionairegameserver.ui.viewmodel.CurrentQuestionUiState
 import com.example.millionairegameserver.ui.viewmodel.CurrentRewardUiState
 import com.example.millionairegameserver.ui.viewmodel.RewardUiState
@@ -45,6 +47,13 @@ class DataRepository(private val context: Context): Repository {
 
     private val _tableUiState = MutableStateFlow<CurrentRewardUiState>(CurrentRewardUiState.Success(0))
     val tableUiState: StateFlow<CurrentRewardUiState> = _tableUiState
+
+    private val _chartUiState = MutableStateFlow<ChartUiState>(
+        ChartUiState.Success(
+            ChartModel(0, 50,50,50,50)
+        )
+    )
+    val chartUiState: StateFlow<ChartUiState> = _chartUiState
 
 
     override fun loadQuestionsToDatabase() {
@@ -111,7 +120,8 @@ class DataRepository(private val context: Context): Repository {
             delay(2000)
             navigateUp()
             delay(2000)*/
-            navigateTable()
+            //navigateTable()
+            navigateChart()
         }
     }
 
@@ -121,10 +131,25 @@ class DataRepository(private val context: Context): Repository {
     override fun showFifty() {
     }
 
-    override fun getChartQuantity() {
+    override fun loadChartResult(chartModel: ChartModel) {
+        val dao = AppDatabase.getDatabase().chartDao()
+        scope.launch {
+            dao.insertAll(chartModel)
+        }
+        Toast.makeText(context, "Resultados cargados", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun showChartResult() {
+        val dao = AppDatabase.getDatabase().chartDao()
+        scope.launch {
+            val chartResult = dao.loadQuestionById(0)
+            _chartUiState.value = ChartUiState.Success(chartResult)
+        }
     }
 
     override fun navigateChart() {
+        Log.d(TAG, "navigateChart: ")
+        broadcastUpdate(Actions.NAVIGATE_CHART)
     }
 
     override fun navigateClock() {
