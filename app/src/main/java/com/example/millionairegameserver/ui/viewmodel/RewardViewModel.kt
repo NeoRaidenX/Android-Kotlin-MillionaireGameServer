@@ -19,4 +19,5 @@ class RewardViewModel @Inject constructor(
 sealed class RewardUiState {
     data class Success(val reward: String): RewardUiState()
     data class Error(val e: Throwable): RewardUiState()
+
 }

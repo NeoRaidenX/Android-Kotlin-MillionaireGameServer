@@ -1,5 +1,9 @@
 package com.example.millionairegameserver.ui.fragments
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,8 +21,12 @@ import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
+import com.example.millionairegameserver.Actions
 import com.example.millionairegameserver.AnswersEnum
+import com.example.millionairegameserver.App
 import com.example.millionairegameserver.ui.viewmodel.QuestionViewModel
 import com.example.millionairegameserver.R
 import com.example.millionairegameserver.databinding.FragmentQuestionBinding
@@ -27,7 +35,6 @@ import com.example.millionairegameserver.ui.viewmodel.CurrentQuestionUiState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 @AndroidEntryPoint
 @UnstableApi
@@ -46,11 +53,40 @@ class QuestionFragment : Fragment() {
 
     private lateinit var currentQuestionModel: QuestionModel
 
+    private val actionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            Log.d(TAG, "onReceive: ${intent.action}")
+            when(intent.action) {
+                Actions.NAVIGATE_TABLE -> {
+                    val action = QuestionFragmentDirections.actionQuestionFragmentToTableFragment()
+                    findNavController().navigate(action)
+                }
+                Actions.NAVIGATE_REWARD -> {
+                    val action = QuestionFragmentDirections.actionQuestionFragmentToRewardFragment()
+                    findNavController().navigate(action)
+                }
+            }
+        }
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: ")
         viewModel = activity?.run {
             ViewModelProvider(this).get(QuestionViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
+        findNavController().addOnDestinationChangedListener { controller, destination, arguments ->
+            Log.d(TAG, "destination changed: ${destination.label}")
+            when(destination.label) {
+                "fragment_question" -> {
+                    Log.d(TAG, "fragment_question: ")
+                }
+                else -> {
+                    unregisterReceiver()
+                }
+            }
+        }
     }
 
     override fun onCreateView(
@@ -92,7 +128,6 @@ class QuestionFragment : Fragment() {
                     is CurrentQuestionUiState.ShowAnswer -> showAnswer(AnswersEnum.values()[currentQuestion.position])
                     is CurrentQuestionUiState.MarkAnswer -> markAnswer(AnswersEnum.values()[currentQuestion.position])
                     is CurrentQuestionUiState.CorrectAnswer -> correctAnswer(AnswersEnum.values()[currentQuestion.position])
-                    is CurrentQuestionUiState.Navigate -> navigateToReward()
                 }
             }
         }
@@ -100,6 +135,8 @@ class QuestionFragment : Fragment() {
         return binding.root
 
     }
+
+
 
     private fun correctAnswer(position: AnswersEnum) {
         Log.d(TAG, "correctAnswer: ")
@@ -143,26 +180,34 @@ class QuestionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        registerReceiver()
         lifecycleScope.launch {
-            delay(3000)
+            delay(1000)
             viewModel.getCurrentQuestion()
         }
     }
 
-    private fun navigateToReward() {
-        val action = QuestionFragmentDirections.actionQuestionFragmentToRewardFragment()
-        findNavController().navigate(action)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        exoPlayer?.stop()
-        exoPlayer.release()
+        Log.d(TAG, "onDestroy: ")
+        unregisterReceiver()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    private fun registerReceiver() {
+        Log.d(TAG, "registerReceiver: ")
+        App.applicationContext().registerReceiver(actionReceiver, getLoginIntentFilter())
+    }
 
+    private fun unregisterReceiver() {
+        Log.d(TAG, "unregisterReceiver: ")
+        App.applicationContext().unregisterReceiver(actionReceiver)
+    }
+    private fun getLoginIntentFilter(): IntentFilter {
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(Actions.NAVIGATE_REWARD)
+        intentFilter.addAction(Actions.NAVIGATE_TABLE)
+        intentFilter.addAction(Actions.NAVIGATE_UP)
+        return intentFilter
     }
 
 }

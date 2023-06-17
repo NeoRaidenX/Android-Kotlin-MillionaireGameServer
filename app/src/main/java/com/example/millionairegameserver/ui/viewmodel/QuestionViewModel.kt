@@ -28,5 +28,4 @@ sealed class CurrentQuestionUiState {
     data class ShowAnswer(val position: Int): CurrentQuestionUiState()
     data class MarkAnswer(val position: Int): CurrentQuestionUiState()
     data class CorrectAnswer(val position: Int): CurrentQuestionUiState()
-    data class Navigate(val action: Int): CurrentQuestionUiState()
 }

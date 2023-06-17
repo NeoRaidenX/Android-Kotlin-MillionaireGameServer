@@ -1,8 +1,6 @@
 package com.example.millionairegameserver.repository
 
 import com.example.millionairegameserver.LifelinesEnum
-import com.example.millionairegameserver.datamodel.QuestionModel
-import kotlinx.coroutines.flow.Flow
 
 interface Repository {
 
@@ -13,18 +11,21 @@ interface Repository {
     fun showAnswer(position: Int)
     fun markAnswer(position: Int)
     fun showCorrectAnswer(position: Int)
-    fun showReward()
+    fun navigateReward()
+    fun navigateUp()
+    fun navigateTable()
     fun nextQuestion()
     fun updateLastAnswered(questionNumber: Int)
     fun toggleLifeline(lifeline: LifelinesEnum)
     suspend fun getCurrentQuestion()
     fun selectQuestion(questionNumber: Int)
-    fun showFifty()
 
+    fun showFifty()
     //Lifelines
     fun getChartQuantity()
-    fun showChart()
-    fun showClock()
+    fun navigateChart()
+
+    fun navigateClock()
     fun startClock()
 
     fun getCurrentReward()

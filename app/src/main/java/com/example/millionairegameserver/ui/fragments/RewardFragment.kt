@@ -1,5 +1,9 @@
 package com.example.millionairegameserver.ui.fragments
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +21,9 @@ import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
+import androidx.navigation.fragment.findNavController
+import com.example.millionairegameserver.Actions
+import com.example.millionairegameserver.App
 import com.example.millionairegameserver.R
 import com.example.millionairegameserver.databinding.FragmentRewardBinding
 import com.example.millionairegameserver.ui.viewmodel.RewardUiState
@@ -34,6 +41,16 @@ import kotlinx.coroutines.launch
     private lateinit var binding: FragmentRewardBinding
     private lateinit var playerview: PlayerView
     private lateinit var exoPlayer: ExoPlayer
+
+    private val actionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when(intent.action) {
+                Actions.NAVIGATE_UP -> {
+                    findNavController().navigateUp()
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +103,23 @@ import kotlinx.coroutines.launch
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated: ")
+        App.applicationContext().registerReceiver(actionReceiver, getLoginIntentFilter())
+    }
+
+    private fun getLoginIntentFilter(): IntentFilter {
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(Actions.NAVIGATE_UP)
+        return intentFilter
+    }
+
+    private fun navigateUp() {
+        Log.d(TAG, "navigateUp: ")
+        findNavController().navigateUp()
+    }
+
     private fun showReward(reward: String) {
         binding.rewardTitle.text = reward
     }
@@ -94,4 +128,21 @@ import kotlinx.coroutines.launch
         Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause: ")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop: ")
+        App.applicationContext().unregisterReceiver(actionReceiver)
+        exoPlayer?.stop()
+        exoPlayer.release()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy: ")
+    }
 }

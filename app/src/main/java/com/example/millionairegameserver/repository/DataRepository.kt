@@ -1,25 +1,26 @@
 package com.example.millionairegameserver.repository
 
 import android.content.Context
+import android.content.Intent
+import android.util.Log
 import android.widget.Toast
-import com.example.millionairegameserver.AnswersEnum
+import com.example.millionairegameserver.Actions
 import com.example.millionairegameserver.App
 import com.example.millionairegameserver.LifelinesEnum
 import com.example.millionairegameserver.RewardTableEnum
 import com.example.millionairegameserver.database.AppDatabase
 import com.example.millionairegameserver.datamodel.QuestionModel
 import com.example.millionairegameserver.ui.viewmodel.CurrentQuestionUiState
+import com.example.millionairegameserver.ui.viewmodel.CurrentRewardUiState
 import com.example.millionairegameserver.ui.viewmodel.RewardUiState
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -41,6 +42,9 @@ class DataRepository(private val context: Context): Repository {
 
     private val _rewardUiState = MutableStateFlow<RewardUiState>(RewardUiState.Success("0"))
     val rewardUiState: StateFlow<RewardUiState> = _rewardUiState
+
+    private val _tableUiState = MutableStateFlow<CurrentRewardUiState>(CurrentRewardUiState.Success(0))
+    val tableUiState: StateFlow<CurrentRewardUiState> = _tableUiState
 
 
     override fun loadQuestionsToDatabase() {
@@ -64,10 +68,6 @@ class DataRepository(private val context: Context): Repository {
         _mainUiState.value = CurrentQuestionUiState.CorrectAnswer(position)
     }
 
-    override fun showReward() {
-        _mainUiState.value = CurrentQuestionUiState.Navigate(0)
-    }
-
     override fun nextQuestion() {
     }
 
@@ -82,10 +82,11 @@ class DataRepository(private val context: Context): Repository {
     }
 
     override suspend fun getCurrentQuestion()  {
+        Log.d(TAG, "getCurrentQuestion: ")
         val dao = AppDatabase.getDatabase().questionDao()
         scope.launch {
-            _mainUiState.value = CurrentQuestionUiState.Success(dao.getCurrentQuestion())
-            delay(2000)
+            //_mainUiState.value = CurrentQuestionUiState.Success(dao.getCurrentQuestion())
+            /*delay(2000)
             showAnswer(0)
             delay(1000)
             showAnswer(1)
@@ -96,8 +97,8 @@ class DataRepository(private val context: Context): Repository {
             delay(2000)
             markAnswer(0)
             delay(2000)
-            showCorrectAnswer(0)
-            delay(2000)
+            showCorrectAnswer(0)*/
+            /*delay(2000)
             updateLastAnswered(0)
             updateLastAnswered(1)
             updateLastAnswered(2)
@@ -106,7 +107,11 @@ class DataRepository(private val context: Context): Repository {
             delay(2000)
             _mainUiState.value = CurrentQuestionUiState.Success(dao.getCurrentQuestion())
             delay(2000)
-            showReward()
+            navigateReward()
+            delay(2000)
+            navigateUp()
+            delay(2000)*/
+            navigateTable()
         }
     }
 
@@ -119,10 +124,25 @@ class DataRepository(private val context: Context): Repository {
     override fun getChartQuantity() {
     }
 
-    override fun showChart() {
+    override fun navigateChart() {
     }
 
-    override fun showClock() {
+    override fun navigateClock() {
+    }
+
+    override fun navigateUp() {
+        Log.d(TAG, "navigateUp: ")
+        broadcastUpdate(Actions.NAVIGATE_UP)
+    }
+
+    override fun navigateTable() {
+        Log.d(TAG, "navigateTable: ")
+        broadcastUpdate(Actions.NAVIGATE_TABLE)
+    }
+
+    override fun navigateReward() {
+        Log.d(TAG, "navigateReward: ")
+        broadcastUpdate(Actions.NAVIGATE_REWARD)
     }
 
     override fun startClock() {
@@ -163,7 +183,18 @@ class DataRepository(private val context: Context): Repository {
 
     }
 
+    suspend fun getCurrentTableReward() {
+        val dao = AppDatabase.getDatabase().questionDao()
+        scope.launch {
+            val answeredCount = dao.getAnsweredCount()
+            _tableUiState.value = CurrentRewardUiState.Success(answeredCount)
+        }
+    }
 
+    private fun broadcastUpdate(action: String) {
+        val intent = Intent(action)
+        context.sendBroadcast(intent)
+    }
 
 
 }
