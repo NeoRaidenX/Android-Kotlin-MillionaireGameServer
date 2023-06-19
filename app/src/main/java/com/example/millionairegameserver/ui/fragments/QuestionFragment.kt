@@ -11,8 +11,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -21,8 +23,6 @@ import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
 import com.example.millionairegameserver.Actions
 import com.example.millionairegameserver.AnswersEnum
@@ -33,7 +33,12 @@ import com.example.millionairegameserver.databinding.FragmentQuestionBinding
 import com.example.millionairegameserver.datamodel.QuestionModel
 import com.example.millionairegameserver.ui.viewmodel.CurrentQuestionUiState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -100,6 +105,9 @@ class QuestionFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        Log.d(TAG, "onCreateView: ")
+
         binding = FragmentQuestionBinding.inflate(inflater, container, false)
 
         playerview = binding.playerview
@@ -124,23 +132,49 @@ class QuestionFragment : Fragment() {
             }
         })
 
-        lifecycleScope.launch {
-            viewModel.uiState.collect { currentQuestion ->
-                Log.d(TAG, "collect onCreateView: ${currentQuestion.javaClass.name}")
-                when (currentQuestion) {
-                    is CurrentQuestionUiState.Error -> showError(currentQuestion.e)
-                    is CurrentQuestionUiState.Success -> {
-                        updateQuestionView(currentQuestion.currentQuestion)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { currentQuestion ->
+                    Log.d(TAG, "collect onCreateView: ${currentQuestion.javaClass.name}")
+                    when (currentQuestion) {
+                        is CurrentQuestionUiState.Error -> showError(currentQuestion.e)
+                        is CurrentQuestionUiState.Success -> {
+                            updateQuestionView(currentQuestion.currentQuestion)
+                        }
+                        is CurrentQuestionUiState.ShowQuestion -> showQuestion()
+                        is CurrentQuestionUiState.ShowOption -> showOption(AnswersEnum.values()[currentQuestion.position])
+                        is CurrentQuestionUiState.MarkAnswer -> markAnswer(AnswersEnum.values()[currentQuestion.position])
+                        is CurrentQuestionUiState.CorrectAnswer -> correctAnswer(AnswersEnum.values()[currentQuestionModel.correct])
                     }
-                    is CurrentQuestionUiState.ShowAnswer -> showAnswer(AnswersEnum.values()[currentQuestion.position])
-                    is CurrentQuestionUiState.MarkAnswer -> markAnswer(AnswersEnum.values()[currentQuestion.position])
-                    is CurrentQuestionUiState.CorrectAnswer -> correctAnswer(AnswersEnum.values()[currentQuestion.position])
                 }
             }
         }
 
         return binding.root
 
+    }
+
+    private fun showQuestion() {
+        Log.d(TAG, "showQuestion: ")
+        binding.questionTitle.text = currentQuestionModel.question
+    }
+
+    /*private fun changeNextQuestion() {
+        lifecycleScope.launch {
+            viewModel.changeNextQuestion()
+        }
+    }*/
+
+    private fun resetUiState() {
+        binding.questionTitle.text = ""
+        binding.ansA.text = ""
+        binding.ansB.text = ""
+        binding.ansC.text = ""
+        binding.ansD.text = ""
+        binding.ansABg.setImageResource(R.drawable.question_title)
+        binding.ansBBg.setImageResource(R.drawable.question_title)
+        binding.ansCBg.setImageResource(R.drawable.question_title)
+        binding.ansDBg.setImageResource(R.drawable.question_title)
     }
 
 
@@ -152,19 +186,44 @@ class QuestionFragment : Fragment() {
             AnswersEnum.ANSWER_C -> binding.ansCBg.setImageResource(R.drawable.answer_correct)
             AnswersEnum.ANSWER_D -> binding.ansDBg.setImageResource(R.drawable.answer_correct)
         }
+        updateLastAnswered()
+    }
+
+    private fun updateLastAnswered() {
+        viewModel.changeNextQuestion()
     }
 
     private fun markAnswer(position: AnswersEnum) {
         Log.d(TAG, "markAnswer: ")
         when(position) {
-            AnswersEnum.ANSWER_A -> binding.ansABg.setImageResource(R.drawable.answer_marked)
-            AnswersEnum.ANSWER_B -> binding.ansBBg.setImageResource(R.drawable.answer_marked)
-            AnswersEnum.ANSWER_C -> binding.ansCBg.setImageResource(R.drawable.answer_marked)
-            AnswersEnum.ANSWER_D -> binding.ansDBg.setImageResource(R.drawable.answer_marked)
+            AnswersEnum.ANSWER_A -> {
+                binding.ansABg.setImageResource(R.drawable.answer_marked)
+                binding.ansBBg.setImageResource(R.drawable.question_title)
+                binding.ansCBg.setImageResource(R.drawable.question_title)
+                binding.ansDBg.setImageResource(R.drawable.question_title)
+            }
+            AnswersEnum.ANSWER_B -> {
+                binding.ansABg.setImageResource(R.drawable.question_title)
+                binding.ansBBg.setImageResource(R.drawable.answer_marked)
+                binding.ansCBg.setImageResource(R.drawable.question_title)
+                binding.ansDBg.setImageResource(R.drawable.question_title)
+            }
+            AnswersEnum.ANSWER_C -> {
+                binding.ansABg.setImageResource(R.drawable.question_title)
+                binding.ansBBg.setImageResource(R.drawable.question_title)
+                binding.ansCBg.setImageResource(R.drawable.answer_marked)
+                binding.ansDBg.setImageResource(R.drawable.question_title)
+            }
+            AnswersEnum.ANSWER_D -> {
+                binding.ansABg.setImageResource(R.drawable.question_title)
+                binding.ansBBg.setImageResource(R.drawable.question_title)
+                binding.ansCBg.setImageResource(R.drawable.question_title)
+                binding.ansDBg.setImageResource(R.drawable.answer_marked)
+            }
         }
     }
 
-    private fun showAnswer(position: AnswersEnum) {
+    private fun showOption(position: AnswersEnum) {
         Log.d(TAG, "showAnswer: ")
         when(position) {
             AnswersEnum.ANSWER_A -> binding.ansA.text = currentQuestionModel.optionA
@@ -181,16 +240,22 @@ class QuestionFragment : Fragment() {
     private fun updateQuestionView(currentQuestion: QuestionModel) {
         Log.d(TAG, "updateQuestionView: ")
         currentQuestionModel = currentQuestion
-        binding.questionTitle.text = currentQuestion.question
+        Toast.makeText(requireContext(), currentQuestion.uid.toString(), Toast.LENGTH_SHORT).show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         registerReceiver()
-        lifecycleScope.launch {
+        resetUiState()
+        /*lifecycleScope.launch {
             delay(1000)
             viewModel.getCurrentQuestion()
-        }
+        }*/
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop: ")
     }
 
     override fun onDestroy() {

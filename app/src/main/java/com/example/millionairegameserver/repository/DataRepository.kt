@@ -1,13 +1,19 @@
 package com.example.millionairegameserver.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Message
 import android.util.Log
 import android.widget.Toast
 import com.example.millionairegameserver.Actions
 import com.example.millionairegameserver.App
 import com.example.millionairegameserver.LifelinesEnum
 import com.example.millionairegameserver.RewardTableEnum
+import com.example.millionairegameserver.bluetooth.BluetoothChatService
+import com.example.millionairegameserver.bluetooth.BluetoothUiState
+import com.example.millionairegameserver.bluetooth.Constants
 import com.example.millionairegameserver.database.AppDatabase
 import com.example.millionairegameserver.datamodel.ChartModel
 import com.example.millionairegameserver.datamodel.QuestionModel
@@ -35,6 +41,9 @@ class DataRepository(private val context: Context): Repository {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
+    private val _btUiState = MutableStateFlow<BluetoothUiState>(BluetoothUiState.Connecting(""))
+    val btUiState: StateFlow<BluetoothUiState> = _btUiState
+
     private val _mainUiState = MutableStateFlow<CurrentQuestionUiState>(
         CurrentQuestionUiState.Success(
         QuestionModel(0, "", "", "", "", "", 0, 0, false)
@@ -56,17 +65,158 @@ class DataRepository(private val context: Context): Repository {
     val chartUiState: StateFlow<ChartUiState> = _chartUiState
 
 
+
+
+    private var connected: Boolean = false
+    private lateinit var  mConnectedDeviceName: String
+    private var mChatService: BluetoothChatService? = null
+
+    private val mHandler = @SuppressLint("HandlerLeak")
+    object : Handler() {
+        override fun handleMessage(msg: Message) {
+
+            when (msg.what) {
+
+                Constants.MESSAGE_STATE_CHANGE -> {
+                    Log.d(TAG, "MESSAGE_STATE_CHANGE: ")
+                    when (msg.arg1) {
+
+                        BluetoothChatService.STATE_CONNECTED -> {
+                            Log.d(TAG, "STATE_CONNECTED: ")
+                            connected = true
+                        }
+
+                        BluetoothChatService.STATE_CONNECTING -> {
+                            Log.d(TAG, "STATE_CONNECTING: ")
+                            connected = false
+                        }
+
+                        BluetoothChatService.STATE_LISTEN, BluetoothChatService.STATE_NONE -> {
+                            Log.d(TAG, "STATE_LISTEN: ")
+                            connected = false
+                        }
+                    }
+                }
+
+                Constants.MESSAGE_WRITE -> {
+                    Log.d(TAG, "MESSAGE_WRITE: ")
+                    val writeBuf = msg.obj as ByteArray
+
+                }
+                Constants.MESSAGE_READ -> {
+                    val readBuf = msg.obj as ByteArray
+                    // construct a string from the valid bytes in the buffer
+                    val readMessage = String(readBuf, 0, msg.arg1)
+                    Log.d(TAG, "MESSAGE_READ: $readMessage")
+                    executeAction(readMessage)
+                }
+                Constants.MESSAGE_DEVICE_NAME -> {
+                    Log.d(TAG, "MESSAGE_DEVICE_NAME: ")
+                    // save the connected device's name
+                    mConnectedDeviceName = msg.data.getString(Constants.DEVICE_NAME)!!
+                    connected = true
+                    _btUiState.value = BluetoothUiState.Success(0)
+                }
+                Constants.MESSAGE_TOAST -> {
+                    Log.d(TAG, "MESSAGE_TOAST: ")
+                    connected = false
+                }
+            }
+        }
+    }
+
+    private fun executeAction(action: String) {
+        when(action) {
+            Actions.CONFIG_SHOW_OPENING -> {
+                navigateOpening()
+            }
+            Actions.MAIN_LOAD_QUESTION -> {
+                loadQuestion()
+            }
+            Actions.MAIN_SHOW_QUESTION -> {
+                showQuestion()
+            }
+            Actions.MAIN_SHOW_OPTION_A -> {
+                showOption(0)
+            }
+            Actions.MAIN_SHOW_OPTION_B -> {
+                showOption(1)
+            }
+            Actions.MAIN_SHOW_OPTION_C -> {
+                showOption(2)
+            }
+            Actions.MAIN_SHOW_OPTION_D -> {
+                showOption(3)
+            }
+            Actions.MAIN_MARK_OPTION_A -> {
+                markAnswer(0)
+            }
+            Actions.MAIN_MARK_OPTION_B -> {
+                markAnswer(1)
+            }
+            Actions.MAIN_MARK_OPTION_C -> {
+                markAnswer(2)
+            }
+            Actions.MAIN_MARK_OPTION_D -> {
+                markAnswer(3)
+            }
+            Actions.MAIN_SHOW_ANSWER -> {
+                showCorrectAnswer(-1)
+            }
+            Actions.CONFIG_NAV_QUEST -> {
+                navigateQuestion()
+            }
+            Actions.MAIN_CHANGE_NEXT_Q -> {
+                nextQuestion()
+            }
+            Actions.NAVIGATE_UP -> {
+                navigateUp()
+            }
+            Actions.NAVIGATE_REWARD -> {
+                navigateReward()
+            }
+            Actions.NAVIGATE_CHART -> {
+                navigateChart()
+            }
+            Actions.NAVIGATE_CLOCK -> {
+                navigateClock()
+            }
+            Actions.NAVIGATE_TABLE -> {
+                navigateTable()
+            }
+        }
+    }
+
     override fun loadQuestionsToDatabase() {
         saveQuestionsFromFile()
     }
 
-    override fun showQuestion() {
-
-
+    override fun loadQuestion() {
+        val dao = AppDatabase.getDatabase().questionDao()
+        scope.launch {
+            val current = dao.getCurrentQuestion()
+            _mainUiState.value = CurrentQuestionUiState.Success(current)
+        }
     }
 
-    override fun showAnswer(position: Int) {
-        _mainUiState.value = CurrentQuestionUiState.ShowAnswer(position)
+    override fun showQuestion() {
+        _mainUiState.value = CurrentQuestionUiState.ShowQuestion(-1)
+    }
+
+    override fun showAllAnswers() {
+        scope.launch {
+            showOption(0)
+            delay(1000)
+            showOption(1)
+            delay(1000)
+            showOption(2)
+            delay(1000)
+            showOption(3)
+        }
+    }
+
+    override fun showOption(position: Int) {
+        _mainUiState.value = CurrentQuestionUiState.ShowOption(position)
     }
 
     override fun markAnswer(position: Int) {
@@ -78,13 +228,21 @@ class DataRepository(private val context: Context): Repository {
     }
 
     override fun nextQuestion() {
+        val dao = AppDatabase.getDatabase().questionDao()
+        scope.launch {
+            val answeredCount = dao.getAnsweredCount()
+            updateLastAnswered(answeredCount)
+            showQuestion()
+        }
     }
 
     override fun updateLastAnswered(questionNumber: Int) {
         val dao = AppDatabase.getDatabase().questionDao()
-        val questionModel = dao.loadQuestionById(questionNumber)
-        val updated = questionModel.copy(isAnswered = true)
-        dao.updateQuestionAsAnswered(updated)
+        scope.launch {
+            val questionModel = dao.loadQuestionById(questionNumber)
+            val updated = questionModel.copy(isAnswered = true)
+            dao.updateQuestionAsAnswered(updated)
+        }
     }
 
     override fun toggleLifeline(lifeline: LifelinesEnum) {
@@ -146,6 +304,16 @@ class DataRepository(private val context: Context): Repository {
             val chartResult = dao.loadQuestionById(0)
             _chartUiState.value = ChartUiState.Success(chartResult)
         }
+    }
+
+    override fun navigateOpening() {
+        Log.d(TAG, "navigateOpening: ")
+        broadcastUpdate(Actions.NAVIGATE_OPEN)
+    }
+
+    override fun navigateQuestion() {
+        Log.d(TAG, "navigateQuestion: ")
+        broadcastUpdate(Actions.NAVIGATE_QUEST)
     }
 
     override fun navigateChart() {
@@ -224,6 +392,11 @@ class DataRepository(private val context: Context): Repository {
     private fun broadcastUpdate(action: String) {
         val intent = Intent(action)
         context.sendBroadcast(intent)
+    }
+
+    fun startBluetoothServer() {
+        mChatService = BluetoothChatService(context, mHandler)
+        mChatService!!.start()
     }
 
 

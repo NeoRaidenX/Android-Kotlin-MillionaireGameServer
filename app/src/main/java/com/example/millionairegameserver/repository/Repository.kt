@@ -8,8 +8,10 @@ interface Repository {
     fun loadQuestionsToDatabase()
 
     //MainScreen
+
+    fun loadQuestion()
     fun showQuestion()
-    fun showAnswer(position: Int)
+    fun showOption(position: Int)
     fun markAnswer(position: Int)
     fun showCorrectAnswer(position: Int)
     fun navigateReward()
@@ -32,4 +34,7 @@ interface Repository {
 
     fun getCurrentReward()
 
+    fun navigateQuestion()
+    fun navigateOpening()
+    fun showAllAnswers()
 }
