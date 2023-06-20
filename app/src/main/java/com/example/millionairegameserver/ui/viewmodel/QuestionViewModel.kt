@@ -1,6 +1,7 @@
 package com.example.millionairegameserver.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.example.millionairegameserver.datamodel.LifelineModel
 import com.example.millionairegameserver.repository.DataRepository
 import com.example.millionairegameserver.datamodel.QuestionModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,12 @@ class QuestionViewModel @Inject constructor(
 
     val uiState: StateFlow<CurrentQuestionUiState> = dataRepository.mainUiState
 
+    val lifelinesState: StateFlow<LifelinesUiState> = dataRepository.lifelinesUiState
+
+    fun sendResetUi() {
+        dataRepository.resetQuestionUi()
+    }
+
     suspend fun getCurrentQuestion() {
         dataRepository.getCurrentQuestion()
     }
@@ -22,6 +29,15 @@ class QuestionViewModel @Inject constructor(
         dataRepository.nextQuestion()
     }
 
+    fun sendLoadCurrentQuestion() {
+        dataRepository.loadQuestion()
+    }
+
+}
+
+sealed class LifelinesUiState {
+    data class Success(val lifeline: LifelineModel): LifelinesUiState()
+    data class Error(val e: Throwable): LifelinesUiState()
 }
 
 sealed class CurrentQuestionUiState {
@@ -30,5 +46,9 @@ sealed class CurrentQuestionUiState {
     data class ShowQuestion(val position: Int): CurrentQuestionUiState()
     data class ShowOption(val position: Int): CurrentQuestionUiState()
     data class MarkAnswer(val position: Int): CurrentQuestionUiState()
+
+    data class ShowFifty(val position: Int): CurrentQuestionUiState()
+
+    data class ResetQuestionUi(val position: Int): CurrentQuestionUiState()
     data class CorrectAnswer(val position: Int): CurrentQuestionUiState()
 }

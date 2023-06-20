@@ -6,7 +6,11 @@
     "optionB": "opt b",
     "optionC": "opt c",
     "optionD": "opt d",
-    "correct": 0
+    "correct": 0,
+    "a": true,
+    "b": false,
+    "c": true,
+    "d": false
   },
   {
     "uid": 1,
@@ -15,7 +19,11 @@
     "optionB": "opt b",
     "optionC": "opt c",
     "optionD": "opt d",
-    "correct": 1
+    "correct": 1,
+    "a": true,
+    "b": false,
+    "c": true,
+    "d": false
   },
   {
     "uid": 2,
@@ -24,7 +32,11 @@
     "optionB": "opt b",
     "optionC": "opt c",
     "optionD": "opt d",
-    "correct": 2
+    "correct": 2,
+    "a": true,
+    "b": false,
+    "c": true,
+    "d": false
   },
   {
     "uid": 3,
@@ -33,7 +45,11 @@
     "optionB": "opt b",
     "optionC": "opt c",
     "optionD": "opt d",
-    "correct": 3
+    "correct": 3,
+    "a": true,
+    "b": false,
+    "c": true,
+    "d": false
   },
   {
     "uid": 4,
@@ -42,6 +58,10 @@
     "optionB": "opt b",
     "optionC": "opt c",
     "optionD": "opt d",
-    "correct": 0
+    "correct": 0,
+    "a": true,
+    "b": false,
+    "c": true,
+    "d": false
   }
 ]

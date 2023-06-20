@@ -24,14 +24,17 @@ object Actions {
     const val MAIN_SHOW_ANSWER = prefix + "showans"
     const val MAIN_SHOW_REWARD = prefix + "showrew"
     const val MAIN_CHANGE_NEXT_Q = prefix + "changenext"
+
     const val LIFE_SHOW_PPL_FORM = prefix + "showpplform"
     const val LIFE_SHOW_PPL_CHOICE = prefix + "showpplchoice"
     const val LIFE_SHOW_CLOCK = prefix + "showclock"
     const val LIFE_SHOW_50 = prefix + "show50"
-    const val LIFE_TOGGLE_FORM = prefix + "togglelifeform"
+
+    const val LIFE_TOGGLE_GROUP = prefix + "togglelifegroup"
     const val LIFE_TOGGLE_CHART = prefix + "togglelifechart"
-    const val LIFE_TOGGLE_TIMER = prefix + "togglelifetimer"
+    const val LIFE_TOGGLE_PHONE = prefix + "togglelifephone"
     const val LIFE_TOGGLE_50 = prefix + "togglelife50"
+
     const val CONFIG_SHOW_OPENING = prefix + "showop"
     const val CONFIG_SHOW_TABLE = prefix + "showtable"
     const val CONFIG_SELECT_QUEST = prefix + "selectquest"

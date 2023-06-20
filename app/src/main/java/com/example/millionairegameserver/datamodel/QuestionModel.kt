@@ -14,5 +14,9 @@ data class QuestionModel(
     @ColumnInfo(name = "option_d") val optionD: String,
     @ColumnInfo(name = "correct_ans") val correct: Int,
     @ColumnInfo(name = "marked_ans") val markedAnswer: Int,
-    @ColumnInfo(name = "is_answered") val isAnswered: Boolean
+    @ColumnInfo(name = "is_answered") val isAnswered: Boolean,
+    @ColumnInfo(name = "is_opt_a") val isOptA: Boolean,
+    @ColumnInfo(name = "is_opt_b") val isOptB: Boolean,
+    @ColumnInfo(name = "is_opt_c") val isOptC: Boolean,
+    @ColumnInfo(name = "is_opt_d") val isOptD: Boolean,
 )

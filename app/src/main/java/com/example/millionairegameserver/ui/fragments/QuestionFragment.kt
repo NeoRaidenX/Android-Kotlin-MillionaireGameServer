@@ -30,8 +30,10 @@ import com.example.millionairegameserver.App
 import com.example.millionairegameserver.ui.viewmodel.QuestionViewModel
 import com.example.millionairegameserver.R
 import com.example.millionairegameserver.databinding.FragmentQuestionBinding
+import com.example.millionairegameserver.datamodel.LifelineModel
 import com.example.millionairegameserver.datamodel.QuestionModel
 import com.example.millionairegameserver.ui.viewmodel.CurrentQuestionUiState
+import com.example.millionairegameserver.ui.viewmodel.LifelinesUiState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -95,6 +97,7 @@ class QuestionFragment : Fragment() {
                     Log.d(TAG, "fragment_question: ")
                 }
                 else -> {
+                    viewModel.sendResetUi()
                     unregisterReceiver()
                 }
             }
@@ -134,17 +137,31 @@ class QuestionFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { currentQuestion ->
-                    Log.d(TAG, "collect onCreateView: ${currentQuestion.javaClass.name}")
-                    when (currentQuestion) {
-                        is CurrentQuestionUiState.Error -> showError(currentQuestion.e)
-                        is CurrentQuestionUiState.Success -> {
-                            updateQuestionView(currentQuestion.currentQuestion)
+
+                launch {
+                    viewModel.uiState.collect { currentQuestion ->
+                        Log.d(TAG, "collect onCreateView: ${currentQuestion.javaClass.name}")
+                        when (currentQuestion) {
+                            is CurrentQuestionUiState.Error -> showError(currentQuestion.e)
+                            is CurrentQuestionUiState.Success -> {
+                                updateQuestionView(currentQuestion.currentQuestion)
+                            }
+                            is CurrentQuestionUiState.ShowQuestion -> showQuestion()
+                            is CurrentQuestionUiState.ShowOption -> showOption(AnswersEnum.values()[currentQuestion.position])
+                            is CurrentQuestionUiState.MarkAnswer -> markAnswer(AnswersEnum.values()[currentQuestion.position])
+                            is CurrentQuestionUiState.CorrectAnswer -> correctAnswer(AnswersEnum.values()[currentQuestionModel.correct])
+                            is CurrentQuestionUiState.ResetQuestionUi -> resetUiState()
+                            is CurrentQuestionUiState.ShowFifty -> showFifty()
                         }
-                        is CurrentQuestionUiState.ShowQuestion -> showQuestion()
-                        is CurrentQuestionUiState.ShowOption -> showOption(AnswersEnum.values()[currentQuestion.position])
-                        is CurrentQuestionUiState.MarkAnswer -> markAnswer(AnswersEnum.values()[currentQuestion.position])
-                        is CurrentQuestionUiState.CorrectAnswer -> correctAnswer(AnswersEnum.values()[currentQuestionModel.correct])
+                    }
+                }
+
+                launch {
+                    viewModel.lifelinesState.collect { lifelines ->
+                        when(lifelines) {
+                            is LifelinesUiState.Error -> {}
+                            is LifelinesUiState.Success -> updateLifelines(lifelines.lifeline)
+                        }
                     }
                 }
             }
@@ -152,6 +169,21 @@ class QuestionFragment : Fragment() {
 
         return binding.root
 
+    }
+
+    private fun showFifty() {
+        //TODO check action error. All options go blank
+        if(!currentQuestionModel.isOptA) binding.ansA.text = ""
+        if(!currentQuestionModel.isOptB) binding.ansB.text = ""
+        if(!currentQuestionModel.isOptC) binding.ansC.text = ""
+        if(!currentQuestionModel.isOptD) binding.ansD.text = ""
+    }
+
+    private fun updateLifelines(lifeline: LifelineModel) {
+        binding.togglePhone.visibility = if (lifeline.lifelinePhone) View.VISIBLE else View.GONE
+        binding.toggle50.visibility = if (lifeline.lifelineFifty) View.VISIBLE else View.GONE
+        binding.toggleGroup.visibility = if (lifeline.lifelineGroup) View.VISIBLE else View.GONE
+        binding.toggleChart.visibility = if (lifeline.lifelineChart) View.VISIBLE else View.GONE
     }
 
     private fun showQuestion() {
@@ -245,8 +277,10 @@ class QuestionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated: ")
         registerReceiver()
         resetUiState()
+        viewModel.sendLoadCurrentQuestion()
         /*lifecycleScope.launch {
             delay(1000)
             viewModel.getCurrentQuestion()

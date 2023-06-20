@@ -128,6 +128,17 @@ import kotlinx.coroutines.launch
         })
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated: ")
+        registerReceiver()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver()
+    }
+
     private fun registerReceiver() {
         Log.d(TAG, "registerReceiver: ")
         App.applicationContext().registerReceiver(actionReceiver, getLoginIntentFilter())

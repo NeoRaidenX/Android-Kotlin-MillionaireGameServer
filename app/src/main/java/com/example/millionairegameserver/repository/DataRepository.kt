@@ -16,10 +16,12 @@ import com.example.millionairegameserver.bluetooth.BluetoothUiState
 import com.example.millionairegameserver.bluetooth.Constants
 import com.example.millionairegameserver.database.AppDatabase
 import com.example.millionairegameserver.datamodel.ChartModel
+import com.example.millionairegameserver.datamodel.LifelineModel
 import com.example.millionairegameserver.datamodel.QuestionModel
 import com.example.millionairegameserver.ui.viewmodel.ChartUiState
 import com.example.millionairegameserver.ui.viewmodel.CurrentQuestionUiState
 import com.example.millionairegameserver.ui.viewmodel.CurrentRewardUiState
+import com.example.millionairegameserver.ui.viewmodel.LifelinesUiState
 import com.example.millionairegameserver.ui.viewmodel.RewardUiState
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -46,7 +48,7 @@ class DataRepository(private val context: Context): Repository {
 
     private val _mainUiState = MutableStateFlow<CurrentQuestionUiState>(
         CurrentQuestionUiState.Success(
-        QuestionModel(0, "", "", "", "", "", 0, 0, false)
+        QuestionModel(0, "", "", "", "", "", 0, 0, false, true, true, true, true)
     ))
 
     val mainUiState: StateFlow<CurrentQuestionUiState> = _mainUiState
@@ -63,6 +65,18 @@ class DataRepository(private val context: Context): Repository {
         )
     )
     val chartUiState: StateFlow<ChartUiState> = _chartUiState
+
+    private val _lifelinesUiState = MutableStateFlow<LifelinesUiState>(LifelinesUiState.Success(
+        LifelineModel(
+            uid = 0,
+            lifelinePhone = false,
+            lifelineFifty = false,
+            lifelineGroup = false,
+            lifelineChart = false
+        )
+    ))
+
+    val lifelinesUiState: StateFlow<LifelinesUiState> = _lifelinesUiState
 
 
 
@@ -127,63 +141,75 @@ class DataRepository(private val context: Context): Repository {
 
     private fun executeAction(action: String) {
         when(action) {
-            Actions.CONFIG_SHOW_OPENING -> {
-                navigateOpening()
-            }
-            Actions.MAIN_LOAD_QUESTION -> {
-                loadQuestion()
-            }
-            Actions.MAIN_SHOW_QUESTION -> {
-                showQuestion()
-            }
-            Actions.MAIN_SHOW_OPTION_A -> {
-                showOption(0)
-            }
-            Actions.MAIN_SHOW_OPTION_B -> {
-                showOption(1)
-            }
-            Actions.MAIN_SHOW_OPTION_C -> {
-                showOption(2)
-            }
-            Actions.MAIN_SHOW_OPTION_D -> {
-                showOption(3)
-            }
-            Actions.MAIN_MARK_OPTION_A -> {
-                markAnswer(0)
-            }
-            Actions.MAIN_MARK_OPTION_B -> {
-                markAnswer(1)
-            }
-            Actions.MAIN_MARK_OPTION_C -> {
-                markAnswer(2)
-            }
-            Actions.MAIN_MARK_OPTION_D -> {
-                markAnswer(3)
-            }
-            Actions.MAIN_SHOW_ANSWER -> {
-                showCorrectAnswer(-1)
-            }
-            Actions.CONFIG_NAV_QUEST -> {
-                navigateQuestion()
-            }
-            Actions.MAIN_CHANGE_NEXT_Q -> {
-                nextQuestion()
-            }
-            Actions.NAVIGATE_UP -> {
-                navigateUp()
-            }
-            Actions.NAVIGATE_REWARD -> {
-                navigateReward()
-            }
-            Actions.NAVIGATE_CHART -> {
-                navigateChart()
-            }
-            Actions.NAVIGATE_CLOCK -> {
-                navigateClock()
-            }
-            Actions.NAVIGATE_TABLE -> {
-                navigateTable()
-            }
+            Actions.MAIN_LOAD_QUESTION -> loadQuestion()
+            Actions.MAIN_SHOW_QUESTION -> showQuestion()
+            Actions.MAIN_SHOW_OPTION_A -> showOption(0)
+            Actions.MAIN_SHOW_OPTION_B -> showOption(1)
+            Actions.MAIN_SHOW_OPTION_C -> showOption(2)
+            Actions.MAIN_SHOW_OPTION_D -> showOption(3)
+            Actions.MAIN_MARK_OPTION_A -> markAnswer(0)
+            Actions.MAIN_MARK_OPTION_B -> markAnswer(1)
+            Actions.MAIN_MARK_OPTION_C -> markAnswer(2)
+            Actions.MAIN_MARK_OPTION_D -> markAnswer(3)
+            Actions.MAIN_SHOW_ANSWER -> showCorrectAnswer(-1)
+            Actions.MAIN_CHANGE_NEXT_Q -> nextQuestion()
+
+            Actions.NAVIGATE_UP -> navigateUp()
+            Actions.NAVIGATE_REWARD -> navigateReward()
+            Actions.NAVIGATE_CHART -> navigateChart()
+            Actions.NAVIGATE_CLOCK -> navigateClock()
+            Actions.NAVIGATE_TABLE -> navigateTable()
+
+            Actions.LIFE_SHOW_50 -> showFifty()
+
+            Actions.LIFE_TOGGLE_PHONE -> togglePhone()
+            Actions.LIFE_TOGGLE_50 -> toggleFifty()
+            Actions.LIFE_TOGGLE_GROUP -> toggleGroup()
+            Actions.LIFE_TOGGLE_CHART -> toggleChart()
+
+            Actions.CONFIG_SHOW_OPENING -> navigateOpening()
+            Actions.CONFIG_NAV_QUEST -> navigateQuestion()
+
+        }
+    }
+
+    private fun togglePhone() {
+        val dao = AppDatabase.getDatabase().lifelinesDao()
+        scope.launch {
+            val lifelines = dao.loadLifelines(0)
+            val updated = lifelines.copy(lifelinePhone = !lifelines.lifelinePhone)
+            dao.updateLifelines(updated)
+            _lifelinesUiState.value = LifelinesUiState.Success(updated)
+        }
+    }
+
+    private fun toggleFifty() {
+        val dao = AppDatabase.getDatabase().lifelinesDao()
+        scope.launch {
+            val lifelines = dao.loadLifelines(0)
+            val updated = lifelines.copy(lifelineFifty = !lifelines.lifelineFifty)
+            dao.updateLifelines(updated)
+            _lifelinesUiState.value = LifelinesUiState.Success(updated)
+        }
+    }
+
+    private fun toggleGroup() {
+        val dao = AppDatabase.getDatabase().lifelinesDao()
+        scope.launch {
+            val lifelines = dao.loadLifelines(0)
+            val updated = lifelines.copy(lifelineGroup = !lifelines.lifelineGroup)
+            dao.updateLifelines(updated)
+            _lifelinesUiState.value = LifelinesUiState.Success(updated)
+        }
+    }
+
+    private fun toggleChart() {
+        val dao = AppDatabase.getDatabase().lifelinesDao()
+        scope.launch {
+            val lifelines = dao.loadLifelines(0)
+            val updated = lifelines.copy(lifelineChart = !lifelines.lifelineChart)
+            dao.updateLifelines(updated)
+            _lifelinesUiState.value = LifelinesUiState.Success(updated)
         }
     }
 
@@ -232,8 +258,12 @@ class DataRepository(private val context: Context): Repository {
         scope.launch {
             val answeredCount = dao.getAnsweredCount()
             updateLastAnswered(answeredCount)
-            showQuestion()
+            //showQuestion()
         }
+    }
+
+    fun resetQuestionUi() {
+        _mainUiState.value = CurrentQuestionUiState.ResetQuestionUi(-1)
     }
 
     override fun updateLastAnswered(questionNumber: Int) {
@@ -252,35 +282,7 @@ class DataRepository(private val context: Context): Repository {
         Log.d(TAG, "getCurrentQuestion: ")
         val dao = AppDatabase.getDatabase().questionDao()
         scope.launch {
-            //_mainUiState.value = CurrentQuestionUiState.Success(dao.getCurrentQuestion())
-            /*delay(2000)
-            showAnswer(0)
-            delay(1000)
-            showAnswer(1)
-            delay(1000)
-            showAnswer(2)
-            delay(1000)
-            showAnswer(3)
-            delay(2000)
-            markAnswer(0)
-            delay(2000)
-            showCorrectAnswer(0)*/
-            /*delay(2000)
-            updateLastAnswered(0)
-            updateLastAnswered(1)
-            updateLastAnswered(2)
-            updateLastAnswered(3)
-            updateLastAnswered(4)
-            delay(2000)
-            _mainUiState.value = CurrentQuestionUiState.Success(dao.getCurrentQuestion())
-            delay(2000)
-            navigateReward()
-            delay(2000)
-            navigateUp()
-            delay(2000)*/
-            //navigateTable()
-            //navigateChart()
-            //navigateClock()
+
         }
     }
 
@@ -288,6 +290,7 @@ class DataRepository(private val context: Context): Repository {
     }
 
     override fun showFifty() {
+        _mainUiState.value = CurrentQuestionUiState.ShowFifty(-1)
     }
 
     override fun loadChartResult(chartModel: ChartModel) {
@@ -366,6 +369,21 @@ class DataRepository(private val context: Context): Repository {
         return jsonString
     }
 
+    private fun saveLifelines() {
+        val dao = AppDatabase.getDatabase().lifelinesDao()
+        CoroutineScope(Dispatchers.IO).launch {
+            dao.insertAll(
+                LifelineModel(
+                uid = 0,
+                lifelinePhone = false,
+                lifelineFifty = false,
+                lifelineGroup = false,
+                lifelineChart = false
+            )
+            )
+        }
+    }
+
     private fun saveQuestionsFromFile() {
         val jsonString = getJsonDataFromAsset()
         val gson = Gson()
@@ -376,6 +394,7 @@ class DataRepository(private val context: Context): Repository {
         CoroutineScope(Dispatchers.IO).launch {
             dao.insertAll(questions)
         }
+        saveLifelines()
         Toast.makeText(context, "Se han guardado todas las preguntas", Toast.LENGTH_SHORT).show()
 
 
