@@ -9,6 +9,7 @@ object Actions {
     const val NAVIGATE_REWARD = prefix + "nav_reward"
     const val NAVIGATE_CHART = prefix + "nav_chart"
     const val NAVIGATE_CLOCK = prefix + "nav_clock"
+    const val NAVIGATE_NEXT = prefix + "nav_next"
     const val PLAY_CLOCK = prefix + "play_clock"
 
     const val MAIN_LOAD_QUESTION = prefix + "loadquest"
@@ -24,6 +25,7 @@ object Actions {
     const val MAIN_SHOW_ANSWER = prefix + "showans"
     const val MAIN_SHOW_REWARD = prefix + "showrew"
     const val MAIN_CHANGE_NEXT_Q = prefix + "changenext"
+    const val MAIN_SHOW_ALL_OPTIONS = prefix + "showallopt"
 
     const val LIFE_SHOW_PPL_FORM = prefix + "showpplform"
     const val LIFE_SHOW_PPL_CHOICE = prefix + "showpplchoice"

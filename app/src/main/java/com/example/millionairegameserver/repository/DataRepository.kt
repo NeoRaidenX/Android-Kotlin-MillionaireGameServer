@@ -46,11 +46,11 @@ class DataRepository(private val context: Context): Repository {
     private val _btUiState = MutableStateFlow<BluetoothUiState>(BluetoothUiState.Connecting(""))
     val btUiState: StateFlow<BluetoothUiState> = _btUiState
 
-    private val _mainUiState = MutableStateFlow<CurrentQuestionUiState>(
+    /*private val _mainUiState = MutableStateFlow<CurrentQuestionUiState>(
         CurrentQuestionUiState.Success(
         QuestionModel(0, "", "", "", "", "", 0, 0, false, true, true, true, true)
-    ))
-
+    ))*/
+    private val _mainUiState = MutableStateFlow<CurrentQuestionUiState>(CurrentQuestionUiState.ResetQuestionUi(-1))
     val mainUiState: StateFlow<CurrentQuestionUiState> = _mainUiState
 
     private val _rewardUiState = MutableStateFlow<RewardUiState>(RewardUiState.Success("0"))
@@ -153,12 +153,14 @@ class DataRepository(private val context: Context): Repository {
             Actions.MAIN_MARK_OPTION_D -> markAnswer(3)
             Actions.MAIN_SHOW_ANSWER -> showCorrectAnswer(-1)
             Actions.MAIN_CHANGE_NEXT_Q -> nextQuestion()
+            Actions.MAIN_SHOW_ALL_OPTIONS -> showAllOptions()
 
             Actions.NAVIGATE_UP -> navigateUp()
             Actions.NAVIGATE_REWARD -> navigateReward()
             Actions.NAVIGATE_CHART -> navigateChart()
             Actions.NAVIGATE_CLOCK -> navigateClock()
             Actions.NAVIGATE_TABLE -> navigateTable()
+            Actions.NAVIGATE_NEXT -> navigateNext()
 
             Actions.LIFE_SHOW_50 -> showFifty()
 
@@ -229,7 +231,7 @@ class DataRepository(private val context: Context): Repository {
         _mainUiState.value = CurrentQuestionUiState.ShowQuestion(-1)
     }
 
-    override fun showAllAnswers() {
+    override fun showAllOptions() {
         scope.launch {
             showOption(0)
             delay(1000)
@@ -347,6 +349,11 @@ class DataRepository(private val context: Context): Repository {
     override fun startClock() {
         Log.d(TAG, "startClock: ")
         broadcastUpdate(Actions.PLAY_CLOCK)
+    }
+
+    private fun navigateNext() {
+        Log.d(TAG, "navigateNext: ")
+        broadcastUpdate(Actions.NAVIGATE_NEXT)
     }
 
     override fun getCurrentReward() {

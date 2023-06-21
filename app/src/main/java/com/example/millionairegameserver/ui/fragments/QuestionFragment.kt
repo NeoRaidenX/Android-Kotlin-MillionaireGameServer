@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -29,18 +30,14 @@ import com.example.millionairegameserver.AnswersEnum
 import com.example.millionairegameserver.App
 import com.example.millionairegameserver.ui.viewmodel.QuestionViewModel
 import com.example.millionairegameserver.R
+import com.example.millionairegameserver.SongTypeEnum
 import com.example.millionairegameserver.databinding.FragmentQuestionBinding
 import com.example.millionairegameserver.datamodel.LifelineModel
 import com.example.millionairegameserver.datamodel.QuestionModel
 import com.example.millionairegameserver.ui.viewmodel.CurrentQuestionUiState
 import com.example.millionairegameserver.ui.viewmodel.LifelinesUiState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -60,6 +57,10 @@ class QuestionFragment : Fragment() {
 
     private lateinit var currentQuestionModel: QuestionModel
 
+    private lateinit var mediaPlayer: MediaPlayer
+
+    private var markedOptionPosition: Int = 0
+
     private val actionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d(TAG, "onReceive: ${intent.action}")
@@ -73,7 +74,7 @@ class QuestionFragment : Fragment() {
                     findNavController().navigate(action)
                 }
                 Actions.NAVIGATE_CHART -> {
-                    val action = QuestionFragmentDirections.actionQuestionFragmentToChartFragment()
+                    val action = QuestionFragmentDirections.actionQuestionFragmentToPersonFragment()
                     findNavController().navigate(action)
                 }
                 Actions.NAVIGATE_CLOCK -> {
@@ -172,7 +173,6 @@ class QuestionFragment : Fragment() {
     }
 
     private fun showFifty() {
-        //TODO check action error. All options go blank
         if(!currentQuestionModel.isOptA) binding.ansA.text = ""
         if(!currentQuestionModel.isOptB) binding.ansB.text = ""
         if(!currentQuestionModel.isOptC) binding.ansC.text = ""
@@ -212,6 +212,7 @@ class QuestionFragment : Fragment() {
 
     private fun correctAnswer(position: AnswersEnum) {
         Log.d(TAG, "correctAnswer: ")
+
         when(position) {
             AnswersEnum.ANSWER_A -> binding.ansABg.setImageResource(R.drawable.answer_correct)
             AnswersEnum.ANSWER_B -> binding.ansBBg.setImageResource(R.drawable.answer_correct)
@@ -219,6 +220,23 @@ class QuestionFragment : Fragment() {
             AnswersEnum.ANSWER_D -> binding.ansDBg.setImageResource(R.drawable.answer_correct)
         }
         updateLastAnswered()
+        checkIfCorrectAnswer(position.ordinal)
+    }
+
+    private fun checkIfCorrectAnswer(correctAnswer: Int) {
+        if (correctAnswer == markedOptionPosition) {
+            playCorrectSound()
+        } else {
+            playIncorrectSound()
+        }
+    }
+
+    private fun playCorrectSound() {
+        playAnswerSound(SongTypeEnum.CORRECT_ANSWER)
+    }
+
+    private fun playIncorrectSound() {
+        playAnswerSound(SongTypeEnum.INCORRECT_ANSWER)
     }
 
     private fun updateLastAnswered() {
@@ -227,6 +245,7 @@ class QuestionFragment : Fragment() {
 
     private fun markAnswer(position: AnswersEnum) {
         Log.d(TAG, "markAnswer: ")
+        markedOptionPosition = position.ordinal
         when(position) {
             AnswersEnum.ANSWER_A -> {
                 binding.ansABg.setImageResource(R.drawable.answer_marked)
@@ -253,10 +272,12 @@ class QuestionFragment : Fragment() {
                 binding.ansDBg.setImageResource(R.drawable.answer_marked)
             }
         }
+        playAnswerSound(SongTypeEnum.MARKED_ANSWER)
     }
 
     private fun showOption(position: AnswersEnum) {
         Log.d(TAG, "showAnswer: ")
+
         when(position) {
             AnswersEnum.ANSWER_A -> binding.ansA.text = currentQuestionModel.optionA
             AnswersEnum.ANSWER_B -> binding.ansB.text = currentQuestionModel.optionB
@@ -272,7 +293,126 @@ class QuestionFragment : Fragment() {
     private fun updateQuestionView(currentQuestion: QuestionModel) {
         Log.d(TAG, "updateQuestionView: ")
         currentQuestionModel = currentQuestion
+        playIntroQuestion()
+        //selectSongAndPlay()
         Toast.makeText(requireContext(), currentQuestion.uid.toString(), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun playAnswerSound(answerType: SongTypeEnum) {
+
+        mediaPlayer.pause()
+        mediaPlayer.isLooping = false
+
+
+        when (answerType) {
+            SongTypeEnum.CORRECT_ANSWER -> {
+                mediaPlayer = when(currentQuestionModel.uid + 1) {
+                    in 18..19 -> {
+                        MediaPlayer.create(requireContext(), R.raw.correct_hard_ans)
+                    }
+                    20 -> {
+                        MediaPlayer.create(requireContext(), R.raw.correct_final_ans)
+                    }
+                    else -> {
+                        MediaPlayer.create(requireContext(), R.raw.correct_answer)
+                    }
+                }
+            }
+            SongTypeEnum.MARKED_ANSWER -> {
+                mediaPlayer = when (currentQuestionModel.uid + 1) {
+                    in 6..10 -> {
+                        MediaPlayer.create(requireContext(), R.raw.marked_ans_1)
+                    }
+                    in 11..15 -> {
+                        MediaPlayer.create(requireContext(), R.raw.marked_ans_2)
+                    }
+                    in 16..20 -> {
+                        MediaPlayer.create(requireContext(), R.raw.marked_ans_3)
+                    }
+                    else -> {
+                        MediaPlayer.create(requireContext(), R.raw.marked_ans_1)
+                    }
+                }
+            }
+            SongTypeEnum.INCORRECT_ANSWER -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.incorrect_answer)
+            }
+            SongTypeEnum.LIFELINE_50 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.lifeline_50)
+            }
+        }
+        mediaPlayer.start()
+    }
+
+    private fun playIntroQuestion() {
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.intro_question)
+        mediaPlayer.isLooping = false
+        mediaPlayer.start()
+        mediaPlayer.setOnCompletionListener {
+            Log.d(TAG, "OnCompletionListener: ")
+            selectSongAndPlay()
+        }
+    }
+
+    private fun selectSongAndPlay() {
+        if (mediaPlayer.isPlaying) mediaPlayer.stop()
+        when (currentQuestionModel.uid + 1) {
+            in 1..5 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_1_5)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            6 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_6)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            7 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_7)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            8 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_8)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            9 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_9)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            10 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_10)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            in 11..13 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_11_12_13)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            in 14..15 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_14_15)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            16 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_16)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            17 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_17)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+            in 18..20 -> {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.question_18_19_20)
+                mediaPlayer.isLooping = true
+                mediaPlayer.start()
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -285,6 +425,14 @@ class QuestionFragment : Fragment() {
             delay(1000)
             viewModel.getCurrentQuestion()
         }*/
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mediaPlayer.stop()
+        mediaPlayer.release()
+        exoPlayer.stop()
+        exoPlayer.release()
     }
 
     override fun onStop() {

@@ -60,7 +60,7 @@ class OpeningFragment : Fragment() {
                 super.onPlaybackStateChanged(playbackState)
                 Log.d(TAG, "onPlaybackStateChanged: $playbackState")
                 if (playbackState == Player.STATE_ENDED) {
-                    navigateToQuestion()
+                    navigateToIntro()
                 }
             }
         })
@@ -68,8 +68,8 @@ class OpeningFragment : Fragment() {
         return binding.root
     }
 
-    private fun navigateToQuestion() {
-        val action = OpeningFragmentDirections.actionOpeningFragmentToQuestionFragment()
+    private fun navigateToIntro() {
+        val action = OpeningFragmentDirections.actionOpeningFragmentToIntroFragment()
         findNavController().navigate(action)
     }
 

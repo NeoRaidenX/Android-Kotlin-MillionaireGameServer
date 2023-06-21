@@ -76,7 +76,7 @@ import kotlinx.coroutines.launch
         super.onViewCreated(view, savedInstanceState)
         registerReceiver()
         lifecycleScope.launch {
-            delay(3000)
+            //delay(3000)
             viewModel.startClock()
         }
     }

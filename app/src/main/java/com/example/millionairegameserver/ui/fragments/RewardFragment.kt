@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -41,12 +42,13 @@ import kotlinx.coroutines.launch
     private lateinit var binding: FragmentRewardBinding
     private lateinit var playerview: PlayerView
     private lateinit var exoPlayer: ExoPlayer
+    private lateinit var mediaPlayer: MediaPlayer
 
     private val actionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when(intent.action) {
                 Actions.NAVIGATE_UP -> {
-                    findNavController().navigateUp()
+                    navigateUp()
                 }
             }
         }
@@ -122,6 +124,14 @@ import kotlinx.coroutines.launch
 
     private fun showReward(reward: String) {
         binding.rewardTitle.text = reward
+        playRewardSong()
+    }
+
+    private fun playRewardSong() {
+        //mediaPlayer.pause()
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.reward)
+        mediaPlayer.isLooping = false
+        mediaPlayer.start()
     }
 
     private fun showError(e: Throwable) {
@@ -137,6 +147,8 @@ import kotlinx.coroutines.launch
         super.onStop()
         Log.d(TAG, "onStop: ")
         unregisterReceiver()
+        mediaPlayer.stop()
+        mediaPlayer.release()
         exoPlayer?.stop()
         exoPlayer.release()
     }

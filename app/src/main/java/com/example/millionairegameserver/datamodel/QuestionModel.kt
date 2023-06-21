@@ -3,6 +3,7 @@ package com.example.millionairegameserver.datamodel
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 
 @Entity
 data class QuestionModel(
@@ -15,8 +16,8 @@ data class QuestionModel(
     @ColumnInfo(name = "correct_ans") val correct: Int,
     @ColumnInfo(name = "marked_ans") val markedAnswer: Int,
     @ColumnInfo(name = "is_answered") val isAnswered: Boolean,
-    @ColumnInfo(name = "is_opt_a") val isOptA: Boolean,
-    @ColumnInfo(name = "is_opt_b") val isOptB: Boolean,
-    @ColumnInfo(name = "is_opt_c") val isOptC: Boolean,
-    @ColumnInfo(name = "is_opt_d") val isOptD: Boolean,
+    @ColumnInfo(name = "is_opt_a") @SerializedName("a") val isOptA: Boolean,
+    @ColumnInfo(name = "is_opt_b") @SerializedName("b") val isOptB: Boolean,
+    @ColumnInfo(name = "is_opt_c") @SerializedName("c") val isOptC: Boolean,
+    @ColumnInfo(name = "is_opt_d") @SerializedName("d") val isOptD: Boolean,
 )

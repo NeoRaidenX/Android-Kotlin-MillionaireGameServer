@@ -23,8 +23,8 @@
         android:label="fragment_opening"
         tools:layout="@layout/fragment_opening" >
         <action
-            android:id="@+id/action_openingFragment_to_questionFragment"
-            app:destination="@id/questionFragment" />
+            android:id="@+id/action_openingFragment_to_introFragment"
+            app:destination="@id/introFragment" />
     </fragment>
     <fragment
         android:id="@+id/tableFragment"
@@ -48,6 +48,9 @@
         <action
             android:id="@+id/action_questionFragment_to_rewardFragment"
             app:destination="@id/rewardFragment" />
+        <action
+            android:id="@+id/action_questionFragment_to_personFragment"
+            app:destination="@id/personFragment" />
     </fragment>
     <fragment
         android:id="@+id/clockFragment"
@@ -64,4 +67,18 @@
         android:name="com.example.millionairegameserver.ui.fragments.RewardFragment"
         android:label="fragment_reward"
         tools:layout="@layout/fragment_reward" />
+    <fragment
+        android:id="@+id/personFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.PersonFragment"
+        android:label="fragment_person"
+        tools:layout="@layout/fragment_person" />
+    <fragment
+        android:id="@+id/introFragment"
+        android:name="com.example.millionairegameserver.ui.fragments.IntroFragment"
+        android:label="IntroFragment"
+        tools:layout="@layout/fragment_intro">
+        <action
+            android:id="@+id/action_introFragment_to_questionFragment"
+            app:destination="@id/questionFragment" />
+    </fragment>
 </navigation>
