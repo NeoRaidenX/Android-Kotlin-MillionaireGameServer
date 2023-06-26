@@ -12,11 +12,11 @@ import com.example.millionairegameserver.databinding.RowRewardBinding
 class RewardTableAdapter(val context: Context) : Adapter<RewardTableAdapter.ViewHolder>() {
 
     private var currentRewardPosition = 0
+    private var showPosition = 0
 
     inner class ViewHolder(val binding: RowRewardBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(reward: RewardTableEnum) = binding.apply {
             binding.rowRewardNumber.text = (reward.ordinal + 1).toString()
-            binding.rowRewardTitle.text = reward.title
         }
     }
 
@@ -34,10 +34,31 @@ class RewardTableAdapter(val context: Context) : Adapter<RewardTableAdapter.View
         if (position == currentRewardPosition) {
             holder.binding.cardview.setCardBackgroundColor(context.resources.getColor(R.color.reward_bg))
         }
+        if (position <= showPosition) {
+            holder.binding.rowRewardTitle.text = RewardTableEnum.values()[position].title
+        }
+    }
+
+    fun updateShowPosition() {
+        showPosition++
+        notifyDataSetChanged()
     }
 
     fun updateCurrentPosition(position: Int) {
         currentRewardPosition = position
+        showPosition = position
         notifyDataSetChanged()
     }
 }
+
+//TODO
+/* Check music repeat reward
+show person lifeline client icon and name
+questions maks
+question toast
+reward video
+person video
+reward text size for long
+question frag video
+change song last question
+ */

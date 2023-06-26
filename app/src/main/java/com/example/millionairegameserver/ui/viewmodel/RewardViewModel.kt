@@ -17,7 +17,8 @@ class RewardViewModel @Inject constructor(
 }
 
 sealed class RewardUiState {
-    data class Success(val reward: String): RewardUiState()
+    data class Success(val reward: String, val isLastReward: Boolean): RewardUiState()
+    data class Loading(val position: Int): RewardUiState()
     data class Error(val e: Throwable): RewardUiState()
 
 }

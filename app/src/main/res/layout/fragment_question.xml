@@ -45,7 +45,10 @@
         android:layout_height="0dp"
         android:textColor="@color/white"
         android:layout_marginHorizontal="120dp"
+        android:textStyle="bold"
         android:gravity="center"
+        android:textSize="20sp"
+        android:text="test"
         app:layout_constraintTop_toTopOf="@id/question_title_bg"
         app:layout_constraintBottom_toBottomOf="@id/question_title_bg"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,11 +66,25 @@
         app:layout_constraintTop_toBottomOf="@id/question_title_bg"/>
 
     <TextView
+        android:id="@+id/ans_a_init"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="A:"
+        android:textStyle="bold"
+        android:textColor="@color/reward_bg"
+        android:layout_marginStart="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ans_a"
+        app:layout_constraintTop_toTopOf="@id/ans_a_bg"
+        app:layout_constraintBottom_toBottomOf="@id/ans_a_bg"/>
+
+
+    <TextView
         android:id="@+id/ans_a"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="64dp"
-        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="86dp"
+        android:layout_marginEnd="72dp"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
@@ -89,12 +106,25 @@
     <TextView
         android:id="@+id/ans_b"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="64dp"
-        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="86dp"
+        android:layout_marginEnd="72dp"
         android:textColor="@color/white"
         app:layout_constraintStart_toEndOf="@id/guideline_vertical"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ans_b_bg"
+        app:layout_constraintBottom_toBottomOf="@id/ans_b_bg"/>
+
+    <TextView
+        android:id="@+id/ans_b_init"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="B:"
+        android:textStyle="bold"
+        android:textColor="@color/reward_bg"
+        android:layout_marginStart="42dp"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
+        app:layout_constraintEnd_toStartOf="@id/ans_b"
         app:layout_constraintTop_toTopOf="@id/ans_b_bg"
         app:layout_constraintBottom_toBottomOf="@id/ans_b_bg"/>
 
@@ -112,12 +142,25 @@
     <TextView
         android:id="@+id/ans_c"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="64dp"
-        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="86dp"
+        android:layout_marginEnd="72dp"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
+        app:layout_constraintTop_toTopOf="@id/ans_c_bg"
+        app:layout_constraintBottom_toBottomOf="@id/ans_c_bg"/>
+
+    <TextView
+        android:id="@+id/ans_c_init"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="C:"
+        android:textStyle="bold"
+        android:textColor="@color/reward_bg"
+        android:layout_marginStart="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ans_a"
         app:layout_constraintTop_toTopOf="@id/ans_c_bg"
         app:layout_constraintBottom_toBottomOf="@id/ans_c_bg"/>
 
@@ -135,12 +178,26 @@
     <TextView
         android:id="@+id/ans_d"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="64dp"
-        android:gravity="center"
         android:textColor="@color/white"
+        android:layout_marginStart="86dp"
+        android:layout_marginEnd="72dp"
         app:layout_constraintStart_toEndOf="@id/guideline_vertical"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ans_d_bg"
+        app:layout_constraintBottom_toBottomOf="@id/ans_d_bg"/>
+
+    <TextView
+        android:id="@+id/ans_d_init"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="D:"
+        android:textStyle="bold"
+        android:textColor="@color/reward_bg"
+        android:layout_marginStart="42dp"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
+        app:layout_constraintEnd_toStartOf="@id/ans_d"
         app:layout_constraintTop_toTopOf="@id/ans_d_bg"
         app:layout_constraintBottom_toBottomOf="@id/ans_d_bg"/>
 

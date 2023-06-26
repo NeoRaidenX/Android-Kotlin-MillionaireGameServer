@@ -98,8 +98,8 @@ class QuestionFragment : Fragment() {
                     Log.d(TAG, "fragment_question: ")
                 }
                 else -> {
-                    viewModel.sendResetUi()
-                    unregisterReceiver()
+                    //viewModel.sendResetUi()
+                    //unregisterReceiver()
                 }
             }
         }
@@ -114,6 +114,49 @@ class QuestionFragment : Fragment() {
 
         binding = FragmentQuestionBinding.inflate(inflater, container, false)
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    viewModel.uiState.collect { currentQuestion ->
+                        Log.d(TAG, "collect : ${currentQuestion.javaClass.name}")
+                        when (currentQuestion) {
+                            is CurrentQuestionUiState.Error -> showError(currentQuestion.e)
+                            is CurrentQuestionUiState.Success -> {
+                                updateQuestionView(currentQuestion.currentQuestion)
+                                Log.d(TAG, "Success: ${currentQuestion.currentQuestion.uid}")
+                            }
+                            is CurrentQuestionUiState.ShowQuestion -> playIntroQuestion()
+                            is CurrentQuestionUiState.ShowOption -> showOption(AnswersEnum.values()[currentQuestion.position])
+                            is CurrentQuestionUiState.MarkAnswer -> markAnswer(AnswersEnum.values()[currentQuestion.position])
+                            is CurrentQuestionUiState.CorrectAnswer -> correctAnswer(AnswersEnum.values()[currentQuestionModel.correct])
+                            is CurrentQuestionUiState.ResetQuestionUi -> {}
+                            is CurrentQuestionUiState.ShowFifty -> showFifty()
+                            is CurrentQuestionUiState.UpdateSuccess -> {
+                                Toast.makeText(requireContext(), "${currentQuestion.position + 1}", Toast.LENGTH_SHORT).show()
+                                viewModel.sendLoadCurrentQuestion()
+
+                            }
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.lifelinesState.collect { lifelines ->
+                        when(lifelines) {
+                            is LifelinesUiState.Error -> {}
+                            is LifelinesUiState.Success -> updateLifelines(lifelines.lifeline)
+                        }
+                    }
+                }
+            }
+        }
+
+        return binding.root
+
+    }
+
+    private fun loadBackground() {
         playerview = binding.playerview
 
         exoPlayer = ExoPlayer.Builder(requireContext()).build()
@@ -135,41 +178,6 @@ class QuestionFragment : Fragment() {
                 Log.d(TAG, "onPlaybackStateChanged: $playbackState")
             }
         })
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                launch {
-                    viewModel.uiState.collect { currentQuestion ->
-                        Log.d(TAG, "collect onCreateView: ${currentQuestion.javaClass.name}")
-                        when (currentQuestion) {
-                            is CurrentQuestionUiState.Error -> showError(currentQuestion.e)
-                            is CurrentQuestionUiState.Success -> {
-                                updateQuestionView(currentQuestion.currentQuestion)
-                            }
-                            is CurrentQuestionUiState.ShowQuestion -> showQuestion()
-                            is CurrentQuestionUiState.ShowOption -> showOption(AnswersEnum.values()[currentQuestion.position])
-                            is CurrentQuestionUiState.MarkAnswer -> markAnswer(AnswersEnum.values()[currentQuestion.position])
-                            is CurrentQuestionUiState.CorrectAnswer -> correctAnswer(AnswersEnum.values()[currentQuestionModel.correct])
-                            is CurrentQuestionUiState.ResetQuestionUi -> resetUiState()
-                            is CurrentQuestionUiState.ShowFifty -> showFifty()
-                        }
-                    }
-                }
-
-                launch {
-                    viewModel.lifelinesState.collect { lifelines ->
-                        when(lifelines) {
-                            is LifelinesUiState.Error -> {}
-                            is LifelinesUiState.Success -> updateLifelines(lifelines.lifeline)
-                        }
-                    }
-                }
-            }
-        }
-
-        return binding.root
-
     }
 
     private fun showFifty() {
@@ -198,6 +206,8 @@ class QuestionFragment : Fragment() {
     }*/
 
     private fun resetUiState() {
+        Log.d(TAG, "resetUiState: ")
+        loadBackground()
         binding.questionTitle.text = ""
         binding.ansA.text = ""
         binding.ansB.text = ""
@@ -293,9 +303,8 @@ class QuestionFragment : Fragment() {
     private fun updateQuestionView(currentQuestion: QuestionModel) {
         Log.d(TAG, "updateQuestionView: ")
         currentQuestionModel = currentQuestion
-        playIntroQuestion()
         //selectSongAndPlay()
-        Toast.makeText(requireContext(), currentQuestion.uid.toString(), Toast.LENGTH_SHORT).show()
+        //Toast.makeText(requireContext(), currentQuestion.uid.toString(), Toast.LENGTH_SHORT).show()
     }
 
     private fun playAnswerSound(answerType: SongTypeEnum) {
@@ -307,11 +316,8 @@ class QuestionFragment : Fragment() {
         when (answerType) {
             SongTypeEnum.CORRECT_ANSWER -> {
                 mediaPlayer = when(currentQuestionModel.uid + 1) {
-                    in 18..19 -> {
+                    in 16..19 -> {
                         MediaPlayer.create(requireContext(), R.raw.correct_hard_ans)
-                    }
-                    20 -> {
-                        MediaPlayer.create(requireContext(), R.raw.correct_final_ans)
                     }
                     else -> {
                         MediaPlayer.create(requireContext(), R.raw.correct_answer)
@@ -351,6 +357,7 @@ class QuestionFragment : Fragment() {
         mediaPlayer.setOnCompletionListener {
             Log.d(TAG, "OnCompletionListener: ")
             selectSongAndPlay()
+            showQuestion()
         }
     }
 
@@ -419,18 +426,35 @@ class QuestionFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: ")
         registerReceiver()
-        resetUiState()
+
         viewModel.sendLoadCurrentQuestion()
+
         /*lifecycleScope.launch {
             delay(1000)
             viewModel.getCurrentQuestion()
         }*/
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: ")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: ")
+        resetUiState()
+    }
+
     override fun onPause() {
         super.onPause()
-        mediaPlayer.stop()
-        mediaPlayer.release()
+        viewModel.sendResetUi()
+        try {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+        } catch (e: Exception) {
+            Log.d(TAG, "onPause: $e")
+        }
         exoPlayer.stop()
         exoPlayer.release()
     }

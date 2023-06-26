@@ -68,6 +68,13 @@ import kotlinx.coroutines.launch
 
         binding = FragmentRewardBinding.inflate(inflater, container, false)
 
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated: ")
+
         playerview = binding.playerview
 
         exoPlayer = ExoPlayer.Builder(requireContext()).build()
@@ -96,18 +103,12 @@ import kotlinx.coroutines.launch
                 Log.d(TAG, "onCreateView: ")
                 when (currentReward) {
                     is RewardUiState.Error -> showError(currentReward.e)
-                    is RewardUiState.Success -> showReward(currentReward.reward)
+                    is RewardUiState.Loading -> {}
+                    is RewardUiState.Success -> showReward(currentReward.reward, currentReward.isLastReward)
                 }
-
             }
         }
 
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "onViewCreated: ")
         registerReceiver()
     }
 
@@ -122,14 +123,18 @@ import kotlinx.coroutines.launch
         findNavController().navigateUp()
     }
 
-    private fun showReward(reward: String) {
+    private fun showReward(reward: String, isLastReward: Boolean) {
+        if (reward.length > 20) binding.rewardTitle.textSize = 32f
         binding.rewardTitle.text = reward
-        playRewardSong()
+        playRewardSong(isLastReward)
     }
 
-    private fun playRewardSong() {
+    private fun playRewardSong(isLastReward: Boolean) {
         //mediaPlayer.pause()
-        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.reward)
+
+        mediaPlayer =
+            if (isLastReward) MediaPlayer.create(requireContext(), R.raw.correct_final_ans)
+            else MediaPlayer.create(requireContext(), R.raw.reward)
         mediaPlayer.isLooping = false
         mediaPlayer.start()
     }
@@ -141,16 +146,16 @@ import kotlinx.coroutines.launch
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause: ")
+        unregisterReceiver()
+        mediaPlayer.stop()
+        mediaPlayer.release()
+        exoPlayer.stop()
+        exoPlayer.release()
     }
 
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop: ")
-        unregisterReceiver()
-        mediaPlayer.stop()
-        mediaPlayer.release()
-        exoPlayer?.stop()
-        exoPlayer.release()
     }
 
     override fun onDestroy() {

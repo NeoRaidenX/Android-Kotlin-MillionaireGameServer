@@ -22,5 +22,6 @@ class TableViewModel @Inject constructor(
 
 sealed class CurrentRewardUiState {
     data class Success(val position: Int): CurrentRewardUiState()
+    data class Loading(val position: Int): CurrentRewardUiState()
     data class Error(val e: Throwable): CurrentRewardUiState()
 }

@@ -48,12 +48,17 @@ import kotlinx.coroutines.launch
     private lateinit var playerview: PlayerView
     private lateinit var exoPlayer: ExoPlayer
 
+    private lateinit var adapter: RewardTableAdapter
+
     private val actionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d(TAG, "onReceive: ${intent.action}")
             when(intent.action) {
                 Actions.NAVIGATE_UP -> {
                     findNavController().navigateUp()
+                }
+                Actions.LIFE_TABLE_SHOW_REWARD -> {
+                    adapter.updateShowPosition()
                 }
                 else -> {
                     Log.d(TAG, "onReceive: ")
@@ -98,7 +103,7 @@ import kotlinx.coroutines.launch
         })
 
         binding.recyclerview.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
-        val adapter = RewardTableAdapter(requireContext())
+        adapter = RewardTableAdapter(requireContext())
         binding.recyclerview.adapter = adapter
         binding.recyclerview.setHasFixedSize(true)
 
@@ -109,6 +114,7 @@ import kotlinx.coroutines.launch
                     is CurrentRewardUiState.Success -> {
                         adapter.updateCurrentPosition(currentReward.position)
                     }
+                    is CurrentRewardUiState.Loading -> {}
                 }
             }
         }
@@ -127,6 +133,7 @@ import kotlinx.coroutines.launch
     private fun getLoginIntentFilter(): IntentFilter {
         val intentFilter = IntentFilter()
         intentFilter.addAction(Actions.NAVIGATE_UP)
+        intentFilter.addAction(Actions.LIFE_TABLE_SHOW_REWARD)
         return intentFilter
     }
 

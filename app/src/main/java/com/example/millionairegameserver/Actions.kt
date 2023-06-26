@@ -31,6 +31,7 @@ object Actions {
     const val LIFE_SHOW_PPL_CHOICE = prefix + "showpplchoice"
     const val LIFE_SHOW_CLOCK = prefix + "showclock"
     const val LIFE_SHOW_50 = prefix + "show50"
+    const val LIFE_TABLE_SHOW_REWARD = prefix + "showtablerew"
 
     const val LIFE_TOGGLE_GROUP = prefix + "togglelifegroup"
     const val LIFE_TOGGLE_CHART = prefix + "togglelifechart"
@@ -41,6 +42,7 @@ object Actions {
     const val CONFIG_SHOW_TABLE = prefix + "showtable"
     const val CONFIG_SELECT_QUEST = prefix + "selectquest"
     const val CONFIG_NAV_QUEST = prefix + "nav_quest"
+    const val CONFIG_RESET_UI = prefix + "resetui"
 
     const val MSG_DATA = prefix + "msgdata"
     const val START_FOREGROUND = prefix + "startforeground"

@@ -72,11 +72,11 @@ import kotlin.system.measureNanoTime
 
     override fun onPause() {
         super.onPause()
+        unregisterReceiver()
         exoPlayer.stop()
         exoPlayer.release()
         mediaPlayer.stop()
         mediaPlayer.release()
-        unregisterReceiver()
     }
 
     private fun initPlayer() {

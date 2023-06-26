@@ -51,4 +51,6 @@ sealed class CurrentQuestionUiState {
 
     data class ResetQuestionUi(val position: Int): CurrentQuestionUiState()
     data class CorrectAnswer(val position: Int): CurrentQuestionUiState()
+
+    data class UpdateSuccess(val position: Int): CurrentQuestionUiState()
 }

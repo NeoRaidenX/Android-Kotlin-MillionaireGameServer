@@ -37,4 +37,5 @@ interface Repository {
     fun navigateQuestion()
     fun navigateOpening()
     fun showAllOptions()
+    fun showTableNextReward()
 }

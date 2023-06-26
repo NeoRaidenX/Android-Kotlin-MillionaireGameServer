@@ -53,10 +53,10 @@ class DataRepository(private val context: Context): Repository {
     private val _mainUiState = MutableStateFlow<CurrentQuestionUiState>(CurrentQuestionUiState.ResetQuestionUi(-1))
     val mainUiState: StateFlow<CurrentQuestionUiState> = _mainUiState
 
-    private val _rewardUiState = MutableStateFlow<RewardUiState>(RewardUiState.Success("0"))
+    private val _rewardUiState = MutableStateFlow<RewardUiState>(RewardUiState.Success("0", false))
     val rewardUiState: StateFlow<RewardUiState> = _rewardUiState
 
-    private val _tableUiState = MutableStateFlow<CurrentRewardUiState>(CurrentRewardUiState.Success(0))
+    private val _tableUiState = MutableStateFlow<CurrentRewardUiState>(CurrentRewardUiState.Loading(0))
     val tableUiState: StateFlow<CurrentRewardUiState> = _tableUiState
 
     private val _chartUiState = MutableStateFlow<ChartUiState>(
@@ -170,9 +170,22 @@ class DataRepository(private val context: Context): Repository {
             Actions.LIFE_TOGGLE_CHART -> toggleChart()
 
             Actions.CONFIG_SHOW_OPENING -> navigateOpening()
+
             Actions.CONFIG_NAV_QUEST -> navigateQuestion()
+            Actions.CONFIG_RESET_UI -> resetQuestionUi()
+
+            Actions.LIFE_TABLE_SHOW_REWARD -> showTableNextReward()
+
+            else -> {
+                val position = action.substringAfter("|").toInt()
+                selectQuestion(position)
+            }
 
         }
+    }
+
+    override fun showTableNextReward() {
+        broadcastUpdate(Actions.LIFE_TABLE_SHOW_REWARD)
     }
 
     private fun togglePhone() {
@@ -289,6 +302,15 @@ class DataRepository(private val context: Context): Repository {
     }
 
     override fun selectQuestion(questionNumber: Int) {
+        val dao = AppDatabase.getDatabase().questionDao()
+        scope.launch {
+            dao.getAll().take(questionNumber).forEach {
+                val updated = it.copy(isAnswered = true)
+                dao.updateQuestionAsAnswered(updated)
+            }
+            val count = dao.getAnsweredCount()
+            _mainUiState.value = CurrentQuestionUiState.UpdateSuccess(count)
+        }
     }
 
     override fun showFifty() {
@@ -361,7 +383,7 @@ class DataRepository(private val context: Context): Repository {
         scope.launch {
             var answeredCount = dao.getAnsweredCount() - 1
             answeredCount = if (answeredCount == -1) 0 else answeredCount
-            _rewardUiState.value = RewardUiState.Success(RewardTableEnum.values()[answeredCount].title)
+            _rewardUiState.value = RewardUiState.Success(RewardTableEnum.values()[answeredCount].title, answeredCount == 19)
         }
     }
 
